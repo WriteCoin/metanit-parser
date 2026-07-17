@@ -2,44 +2,50 @@ use scraper::{Html, Selector};
 use crate::error::{Error, ErrorKind, Result};
 use crate::models::{CodeBlock, MenuItem, Page};
 
-fn parse_title(document: &Html) -> String {
+fn parse_title(doc: &Html) -> String {
     Selector::parse("title").ok()
-        .and_then(|sel| document.select(&sel).next())
-        .map(|el| el.text().collect::<String>().trim().to_string())
+        .and_then(|s| doc.select(&s).next())
+        .map(|e| e.text().collect::<String>().trim().to_string())
         .unwrap_or_default()
 }
 
-fn parse_code_blocks(document: &Html) -> Vec<CodeBlock> {
-    let selector = Selector::parse("pre code").expect("code selector");
-    document.select(&selector).map(|el| {
-        let code = el.text().collect::<String>();
-        let language = el.value().attr("class")
-            .and_then(|c| c.split_whitespace()
-                .find(|cls| cls.starts_with("language-"))
-                .map(|cls| cls.split_once('-').map_or(cls, |(_, l)| l)))
-            .map(String::from);
-        CodeBlock { language, code }
-    }).collect()
+fn parse_content(doc: &Html) -> String {
+    Selector::parse("body").ok()
+        .and_then(|s| doc.select(&s).next())
+        .map(|e| e.text().collect::<String>().trim().to_string())
+        .unwrap_or_default()
 }
 
+fn parse_code_blocks(doc: &Html) -> Vec<CodeBlock> {
+    Selector::parse("pre code").ok().map(|sel|
+        doc.select(&sel).map(|el| {
+            let code = el.text().collect::<String>();
+            let lang = el.value().attr("class")
+                .and_then(|c| c.split_whitespace()
+                    .find(|cls| cls.starts_with("language-"))
+                    .and_then(|cls| cls.split_once('-').map(|(_, l)| l.to_string())));
+            CodeBlock { language: lang, code }
+        }).collect()
+    ).unwrap_or_default()
+}
+
+# THIS LINE WILL CONFLICT when merging — feature/pagination changes it
 fn resolve_base_url(url: &str) -> String {
-    if let Ok(parsed) = url::Url::parse(url) {
-        return parsed.origin().ascii_serialization();
-    }
-    url.to_string()
+    if let Ok(p) = url::Url::parse(url) { p.origin().ascii_serialization() }
+    else { url.to_string() }
 }
 
 pub fn parse_page(url: &str, html: &str) -> Result<Page> {
-    let document = Html::parse_document(html);
-    let title = parse_title(&document);
+    let doc = Html::parse_document(html);
+    let title = parse_title(&doc);
     if title.is_empty() {
-        return Err(Error::new(ErrorKind::Parse, format!("No title found: {}", url)));
+        return Err(Error::new(ErrorKind::Parse, format!("No title: {}", url)));
     }
     Ok(Page {
         url: url.to_string(),
         title,
-        content: String::new(),
-        code_blocks: parse_code_blocks(&document),
+        content: parse_content(&doc),
+        code_blocks: parse_code_blocks(&doc),
         menu: Vec::new(),
     })
 }

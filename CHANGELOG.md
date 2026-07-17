@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] — 2026-07-18
+
+### Added
+- Code block language detection and extraction functions
+- Menu parser for navigation structure
+- Content extraction with full body text parsing
+- Comprehensive test suites (12 unit + 6 integration tests)
+- thiserror integration for better error ergonomics
+
+### Fixed
+- Robust error handling for missing titles and malformed HTML
+
 ## [1.0.0] — 2026-07-18
 
 ### Added

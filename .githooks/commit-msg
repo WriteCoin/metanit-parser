@@ -1,0 +1,3 @@
+#!/bin/sh
+grep -qE '^(feat|fix|docs|test|ci|refactor|chore|style|perf|security)(\(.+\))?: .+$' "$1" || {
+    echo "ERROR: Commit must follow Conventional Commits: <type>: <desc>"; exit 1; }

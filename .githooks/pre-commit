@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+cargo fmt --check 2>/dev/null || { echo "Formatting issues. Run cargo fmt."; exit 1; }
+cargo clippy -- -D warnings 2>/dev/null || { echo "Clippy warnings."; exit 1; }

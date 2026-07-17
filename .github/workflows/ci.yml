@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push: { branches: [develop, main, feature/**/*, release/**/*, hotfix/**/*], tags: [v*] }
+  pull_request: { branches: [develop, main] }
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with: { components: clippy, rustfmt }
+      - run: cargo fmt --check
+      - run: cargo clippy -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with: { name: release-build, path: target/release/libmetanit_parser* }
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install cargo-audit
+      - run: cargo audit
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [lint, test, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: target/release/libmetanit_parser*
+          generate_release_notes: true

@@ -1,5 +1,6 @@
 pub mod error;
 pub mod models;
+pub mod parser;
 
 pub use error::{Error, ErrorKind, Result};
 pub use models::{CodeBlock, MenuItem, Page, PageSummary};

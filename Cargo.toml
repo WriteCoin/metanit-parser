@@ -1,0 +1,12 @@
+[package]
+name = "metanit-parser"
+version = "0.1.0"
+edition = "2021"
+description = "A Rust library for parsing metanit.com tutorial pages"
+license = "MIT"
+
+[dependencies]
+
+[lib]
+name = "metanit_parser"
+path = "src/lib.rs"

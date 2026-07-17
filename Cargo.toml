@@ -2,7 +2,7 @@
 name = "metanit-parser"
 version = "0.1.0"
 edition = "2021"
-description = "with pagination support"
+description = "A Rust library for parsing metanit.com tutorial pages (with content, menu, and pagination)"
 license = "MIT"
 
 [dependencies]

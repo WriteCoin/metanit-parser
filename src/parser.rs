@@ -29,10 +29,22 @@ fn parse_code_blocks(doc: &Html) -> Vec<CodeBlock> {
     ).unwrap_or_default()
 }
 
-# THIS LINE WILL CONFLICT when merging — feature/pagination changes it
+fn parse_menu(doc: &Html, base_url: &str) -> Vec<MenuItem> {
+    Selector::parse("a[href]").ok().map(|sel|
+        doc.select(&sel).filter_map(|el| {
+            let href = el.value().attr("href")?;
+            if !href.contains("metanit.com") || href.contains('#') { return None; }
+            let title = el.text().collect::<String>().trim().to_string();
+            if title.is_empty() { return None; }
+            let url = if href.starts_with("http") { href.to_string() }
+                      else { format!("{}/{}", base_url.trim_end_matches('/'), href.trim_start_matches('/')) };
+            Some(MenuItem { title, url, children: Vec::new(), active: false })
+        }).collect()
+    ).unwrap_or_default()
+}
+
 fn resolve_base_url(url: &str) -> String {
-    if let Ok(p) = url::Url::parse(url) { p.origin().ascii_serialization() }
-    else { url.to_string() }
+    url::Url::parse(url).map(|p| p.origin().ascii_serialization()).unwrap_or_else(|_| url.to_string())
 }
 
 pub fn parse_page(url: &str, html: &str) -> Result<Page> {
@@ -41,11 +53,12 @@ pub fn parse_page(url: &str, html: &str) -> Result<Page> {
     if title.is_empty() {
         return Err(Error::new(ErrorKind::Parse, format!("No title: {}", url)));
     }
+    let base = resolve_base_url(url);
     Ok(Page {
         url: url.to_string(),
         title,
         content: parse_content(&doc),
         code_blocks: parse_code_blocks(&doc),
-        menu: Vec::new(),
+        menu: parse_menu(&doc, &base),
     })
 }

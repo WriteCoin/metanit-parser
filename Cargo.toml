@@ -1,11 +1,12 @@
 [package]
 name = "metanit-parser"
-version = "0.1.0"
+version = "0.2.0-dev"
 edition = "2021"
-description = "A Rust library for parsing metanit.com tutorial pages"
+description = "HTTP client library for accessing metanit.com"
 license = "MIT"
 
 [dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

@@ -32,6 +32,11 @@ pub struct PageSummary {
 }
 
 impl Page {
+    pub fn title(&self) -> &str { &self.title }
+    pub fn url(&self) -> &str { &self.url }
+    pub fn content(&self) -> &str { &self.content }
+    pub fn code_blocks(&self) -> &[CodeBlock] { &self.code_blocks }
+    pub fn menu(&self) -> &[MenuItem] { &self.menu }
     pub fn word_count(&self) -> usize { self.content.split_whitespace().count() }
     pub fn has_code(&self) -> bool { !self.code_blocks.is_empty() }
     pub fn summary(&self) -> PageSummary {

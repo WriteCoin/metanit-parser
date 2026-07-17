@@ -1,6 +1,7 @@
 pub mod client;
 pub mod error;
 pub mod models;
+pub mod parser;
 
 pub use client::MetanitClient;
 pub use error::{Error, ErrorKind, Result};

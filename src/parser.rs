@@ -11,20 +11,20 @@ fn parse_title(doc: &Html) -> String {
         .unwrap_or_default()
 }
 
-fn parse_content(doc: &Html) -> String {
+fn parse_body_raw(doc: &Html, extract: fn(&scraper::ElementRef) -> String) -> String {
     Selector::parse("body")
         .ok()
         .and_then(|s| doc.select(&s).next())
-        .map(|e| e.text().collect::<String>().trim().to_string())
+        .map(|e| extract(&e))
         .unwrap_or_default()
 }
 
+fn parse_content(doc: &Html) -> String {
+    parse_body_raw(doc, |e| e.text().collect::<String>().trim().to_string())
+}
+
 fn parse_content_html(doc: &Html) -> String {
-    Selector::parse("body")
-        .ok()
-        .and_then(|s| doc.select(&s).next())
-        .map(|e| e.inner_html())
-        .unwrap_or_default()
+    parse_body_raw(doc, |e| e.inner_html())
 }
 
 fn parse_code_blocks(doc: &Html) -> Vec<CodeBlock> {

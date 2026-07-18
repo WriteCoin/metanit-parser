@@ -5,6 +5,7 @@ pub struct Page {
     pub url: String,
     pub title: String,
     pub content: String,
+    pub content_html: String,
     pub code_blocks: Vec<CodeBlock>,
     pub menu: Vec<MenuItem>,
 }
@@ -40,6 +41,9 @@ impl Page {
     }
     pub fn content(&self) -> &str {
         &self.content
+    }
+    pub fn content_html(&self) -> &str {
+        &self.content_html
     }
     pub fn code_blocks(&self) -> &[CodeBlock] {
         &self.code_blocks

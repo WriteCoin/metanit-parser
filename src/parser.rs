@@ -11,12 +11,20 @@ fn parse_title(doc: &Html) -> String {
         .unwrap_or_default()
 }
 
-fn parse_content(doc: &Html) -> String {
+fn parse_body_raw(doc: &Html, extract: fn(&scraper::ElementRef) -> String) -> String {
     Selector::parse("body")
         .ok()
         .and_then(|s| doc.select(&s).next())
-        .map(|e| e.text().collect::<String>().trim().to_string())
+        .map(|e| extract(&e))
         .unwrap_or_default()
+}
+
+fn parse_content(doc: &Html) -> String {
+    parse_body_raw(doc, |e| e.text().collect::<String>().trim().to_string())
+}
+
+fn parse_content_html(doc: &Html) -> String {
+    parse_body_raw(doc, |e| e.inner_html())
 }
 
 fn parse_code_blocks(doc: &Html) -> Vec<CodeBlock> {
@@ -93,6 +101,7 @@ pub fn parse_page(url: &str, html: &str) -> Result<Page> {
         url: url.to_string(),
         title,
         content: parse_content(&doc),
+        content_html: parse_content_html(&doc),
         code_blocks: parse_code_blocks(&doc),
         menu: parse_menu(&doc, &base),
     })
@@ -147,6 +156,7 @@ mod tests {
                 code: "a".into(),
             }],
             menu: vec![],
+            content_html: "".into(),
         };
         assert_eq!(extract_code_languages(&p), vec!["rust"]);
     }
@@ -172,6 +182,7 @@ mod tests {
                 },
             ],
             menu: vec![],
+            content_html: "".into(),
         };
         let c = code_block_count_by_language(&p);
         assert_eq!(c.get("rust"), Some(&2));
@@ -194,6 +205,7 @@ mod tests {
                 code: "x".into(),
             }],
             menu: vec![],
+            content_html: "".into(),
         };
         assert!(w.has_code());
         let wo = Page {
@@ -202,6 +214,7 @@ mod tests {
             content: "".into(),
             code_blocks: vec![],
             menu: vec![],
+            content_html: "".into(),
         };
         assert!(!wo.has_code());
     }
@@ -214,6 +227,7 @@ mod tests {
             content: " a b  c ".into(),
             code_blocks: vec![],
             menu: vec![],
+            content_html: "".into(),
         };
         assert_eq!(p.word_count(), 3);
     }
@@ -253,6 +267,7 @@ mod tests {
                 code: "x".into(),
             }],
             menu: vec![],
+            content_html: "".into(),
         };
         let s = p.summary();
         assert_eq!(s.title, "T");

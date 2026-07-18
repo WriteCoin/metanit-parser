@@ -12,6 +12,7 @@ const DEFAULT_CACHE_TTL: Duration = Duration::from_secs(300);
 
 struct CacheEntry {
     body: String,
+    #[allow(dead_code)]
     expires_at: Instant,
 }
 

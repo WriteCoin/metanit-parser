@@ -19,6 +19,14 @@ fn parse_content(doc: &Html) -> String {
         .unwrap_or_default()
 }
 
+fn parse_content_html(doc: &Html) -> String {
+    Selector::parse("body")
+        .ok()
+        .and_then(|s| doc.select(&s).next())
+        .map(|e| e.inner_html())
+        .unwrap_or_default()
+}
+
 fn parse_code_blocks(doc: &Html) -> Vec<CodeBlock> {
     Selector::parse("pre code")
         .ok()
@@ -93,8 +101,13 @@ pub fn parse_page(url: &str, html: &str) -> Result<Page> {
         url: url.to_string(),
         title,
         content: parse_content(&doc),
+        content_html: parse_content_html(&doc),
         code_blocks: parse_code_blocks(&doc),
         menu: parse_menu(&doc, &base),
+        total_pages: None,
+        current_page: None,
+        prev_url: None,
+        next_url: None,
     })
 }
 
@@ -147,6 +160,11 @@ mod tests {
                 code: "a".into(),
             }],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         assert_eq!(extract_code_languages(&p), vec!["rust"]);
     }
@@ -172,6 +190,11 @@ mod tests {
                 },
             ],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         let c = code_block_count_by_language(&p);
         assert_eq!(c.get("rust"), Some(&2));
@@ -194,6 +217,11 @@ mod tests {
                 code: "x".into(),
             }],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         assert!(w.has_code());
         let wo = Page {
@@ -202,6 +230,11 @@ mod tests {
             content: "".into(),
             code_blocks: vec![],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         assert!(!wo.has_code());
     }
@@ -214,6 +247,11 @@ mod tests {
             content: " a b  c ".into(),
             code_blocks: vec![],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         assert_eq!(p.word_count(), 3);
     }
@@ -253,6 +291,11 @@ mod tests {
                 code: "x".into(),
             }],
             menu: vec![],
+            content_html: String::new(),
+            total_pages: None,
+            current_page: None,
+            prev_url: None,
+            next_url: None,
         };
         let s = p.summary();
         assert_eq!(s.title, "T");

@@ -5,8 +5,13 @@ pub struct Page {
     pub url: String,
     pub title: String,
     pub content: String,
+    pub content_html: String,
     pub code_blocks: Vec<CodeBlock>,
     pub menu: Vec<MenuItem>,
+    pub total_pages: Option<usize>,
+    pub current_page: Option<usize>,
+    pub prev_url: Option<String>,
+    pub next_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +34,10 @@ pub struct PageSummary {
     pub url: String,
     pub code_block_count: usize,
     pub word_count: usize,
+    pub total_pages: Option<usize>,
+    pub current_page: Option<usize>,
+    pub prev_url: Option<String>,
+    pub next_url: Option<String>,
 }
 
 impl Page {
@@ -59,6 +68,10 @@ impl Page {
             url: self.url.clone(),
             code_block_count: self.code_blocks.len(),
             word_count: self.word_count(),
+            total_pages: self.total_pages,
+            current_page: self.current_page,
+            prev_url: self.prev_url.clone(),
+            next_url: self.next_url.clone(),
         }
     }
 }

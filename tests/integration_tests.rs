@@ -38,11 +38,16 @@ fn test_serialization_roundtrip() {
         url: "https://metanit.com/".into(),
         title: "Test".into(),
         content: "Content".into(),
+        content_html: "<p>Content</p>".into(),
         code_blocks: vec![CodeBlock {
             language: Some("rust".into()),
             code: "fn m() {}".into(),
         }],
         menu: vec![],
+        total_pages: None,
+        current_page: None,
+        prev_url: None,
+        next_url: None,
     };
     let json = serde_json::to_string(&page).unwrap();
     let back: Page = serde_json::from_str(&json).unwrap();
@@ -70,6 +75,7 @@ fn test_page_summary() {
         url: "https://metanit.com/rust/2.1.php".into(),
         title: "Variables".into(),
         content: "Variables in Rust are immutable by default.".into(),
+        content_html: "<p>Variables in Rust are immutable by default.</p>".into(),
         code_blocks: vec![
             CodeBlock {
                 language: Some("rust".into()),
@@ -81,6 +87,10 @@ fn test_page_summary() {
             },
         ],
         menu: vec![],
+        total_pages: None,
+        current_page: None,
+        prev_url: None,
+        next_url: None,
     };
     let s = p.summary();
     assert_eq!(s.title, "Variables");

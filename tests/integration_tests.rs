@@ -1,5 +1,5 @@
-use metanit_parser::parser;
 use metanit_parser::models::{CodeBlock, Page};
+use metanit_parser::parser;
 use metanit_parser::MetanitClient;
 use std::time::Duration;
 
@@ -38,7 +38,10 @@ fn test_serialization_roundtrip() {
         url: "https://metanit.com/".into(),
         title: "Test".into(),
         content: "Content".into(),
-        code_blocks: vec![CodeBlock { language: Some("rust".into()), code: "fn m() {}".into() }],
+        code_blocks: vec![CodeBlock {
+            language: Some("rust".into()),
+            code: "fn m() {}".into(),
+        }],
         menu: vec![],
     };
     let json = serde_json::to_string(&page).unwrap();
@@ -68,8 +71,14 @@ fn test_page_summary() {
         title: "Variables".into(),
         content: "Variables in Rust are immutable by default.".into(),
         code_blocks: vec![
-            CodeBlock { language: Some("rust".into()), code: "let x = 5;".into() },
-            CodeBlock { language: Some("rust".into()), code: "let mut y = 10;".into() },
+            CodeBlock {
+                language: Some("rust".into()),
+                code: "let x = 5;".into(),
+            },
+            CodeBlock {
+                language: Some("rust".into()),
+                code: "let mut y = 10;".into(),
+            },
         ],
         menu: vec![],
     };

@@ -12,7 +12,6 @@ const DEFAULT_CACHE_TTL: Duration = Duration::from_secs(300);
 
 struct CacheEntry {
     body: String,
-    #[allow(dead_code)]
     expires_at: Instant,
 }
 
@@ -106,7 +105,13 @@ impl MetanitClient {
     }
 
     fn check_cache(&self, url: &str) -> Option<String> {
-        self.cache.lock().ok()?.get(url).map(|e| e.body.clone())
+        let mut cache = self.cache.lock().ok()?;
+        let entry = cache.get(url)?;
+        if Instant::now() > entry.expires_at {
+            cache.remove(url);
+            return None;
+        }
+        Some(entry.body.clone())
     }
 
     fn set_cache(&self, url: &str, body: String) {

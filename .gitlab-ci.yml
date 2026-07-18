@@ -1,0 +1,46 @@
+image: rust:latest
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cargo/
+    - target/
+
+stages:
+  - lint
+  - test
+  - build
+  - security
+
+before_script:
+  - rustup component add clippy rustfmt
+
+lint:
+  stage: lint
+  script:
+    - cargo fmt --check
+    - cargo clippy -- -D warnings
+
+test:
+  stage: test
+  script:
+    - cargo test
+
+build:
+  stage: build
+  script:
+    - cargo build --release
+  artifacts:
+    paths:
+      - target/release/libmetanit_parser*
+    expire_in: 30 days
+
+security:
+  stage: security
+  script:
+    - cargo install cargo-audit
+    - cargo audit
+  allow_failure: true

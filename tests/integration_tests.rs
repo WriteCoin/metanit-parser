@@ -3,6 +3,62 @@ use metanit_parser::parser;
 use metanit_parser::MetanitClient;
 use std::time::Duration;
 
+mod mock_tests {
+    use metanit_parser::MetanitClient;
+    use std::time::Duration;
+
+    const FIXTURE: &str = r#"<html><head><title>Rust</title></head><body><p>Hello</p></body></html>"#;
+
+    #[test]
+    fn test_mock_successful_parse() {
+        let mut server = mockito::Server::new();
+        let url = server.url();
+        server.mock("GET", "/").with_status(200).with_body(FIXTURE).create();
+        let client = MetanitClient::new().with_timeout(Duration::from_secs(10));
+        let page = client.fetch_page(&format!("{}/", url)).unwrap();
+        assert_eq!(page.title(), "Rust");
+    }
+
+    #[test]
+    fn test_mock_http_error() {
+        let mut server = mockito::Server::new();
+        let url = server.url();
+        server.mock("GET", "/").with_status(404).create();
+        let client = MetanitClient::new()
+            .with_max_retries(0)
+            .with_timeout(Duration::from_secs(10));
+        let result = client.fetch_page(&format!("{}/", url));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mock_cache_hit() {
+        let mut server = mockito::Server::new();
+        let url = server.url();
+        let mock = server.mock("GET", "/").with_status(200).with_body(FIXTURE).expect_at_most(1).create();
+        let client = MetanitClient::new()
+            .with_cache_ttl(Duration::from_secs(60))
+            .with_timeout(Duration::from_secs(10));
+        let _ = client.fetch_page(&format!("{}/", url));
+        let _ = client.fetch_page(&format!("{}/", url));
+        mock.assert();
+    }
+
+    #[test]
+    fn test_mock_clear_cache() {
+        let mut server = mockito::Server::new();
+        let url = server.url();
+        let mock = server.mock("GET", "/").with_status(200).with_body(FIXTURE).expect_at_least(2).create();
+        let client = MetanitClient::new()
+            .with_cache_ttl(Duration::from_secs(3600))
+            .with_timeout(Duration::from_secs(10));
+        let _ = client.fetch_page(&format!("{}/", url));
+        client.clear_cache();
+        let _ = client.fetch_page(&format!("{}/", url));
+        mock.assert();
+    }
+}
+
 const MOCK_HTML: &str = r#"
 <!DOCTYPE html>
 <html><head><title>Metanit Rust Tutorial</title></head>

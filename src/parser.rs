@@ -82,6 +82,10 @@ fn resolve_base_url(url: &str) -> String {
         .unwrap_or_else(|_| url.to_string())
 }
 
+/// Parses an HTML string into a [`Page`] struct.
+///
+/// Extracts title, body text, code blocks, and menu links from the HTML.
+/// Returns `Err` if the document has no `<title>`.
 pub fn parse_page(url: &str, html: &str) -> Result<Page> {
     let doc = Html::parse_document(html);
     let title = parse_title(&doc);
@@ -98,6 +102,7 @@ pub fn parse_page(url: &str, html: &str) -> Result<Page> {
     })
 }
 
+/// Returns the list of detected programming languages across all code blocks.
 pub fn extract_code_languages(page: &Page) -> Vec<&str> {
     page.code_blocks
         .iter()
@@ -105,6 +110,9 @@ pub fn extract_code_languages(page: &Page) -> Vec<&str> {
         .collect()
 }
 
+/// Counts code blocks grouped by programming language.
+///
+/// Blocks without a detected language are counted under `"unknown"`.
 pub fn code_block_count_by_language(page: &Page) -> HashMap<String, usize> {
     let mut counts = HashMap::new();
     for cb in &page.code_blocks {

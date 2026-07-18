@@ -1,5 +1,6 @@
 use std::fmt;
 
+/// Categorised error kind for matching in callers.
 #[derive(Debug)]
 pub enum ErrorKind {
     Http,
@@ -12,6 +13,7 @@ pub enum ErrorKind {
     Timeout,
 }
 
+/// Typed error with a [`ErrorKind`] category and optional source.
 #[derive(Debug)]
 pub struct Error {
     pub kind: ErrorKind,
